@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block content %}
+<h1>ようこそ</h1>
+<p class="small">求人・候補者の登録済みデータを元に、スキル・年収・勤務地でマッチ度を算出します。</p>
+<div class="row">
+  <div class="card">
+    <h2>Jobs</h2>
+    <p class="small">登録済み求人の一覧をカードで確認できます。</p>
+    <a class="btn" href="/jobs">一覧を開く</a>
+  </div>
+  <div class="card">
+    <h2>Match</h2>
+    <p class="small">求人を1件選んで候補者のスコア順に並べます。</p>
+    <a class="btn" href="/match">スコアを見る</a>
+  </div>
+</div>
+{% endblock %}

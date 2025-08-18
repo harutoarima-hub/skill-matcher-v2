@@ -1,0 +1,5 @@
+company,title,must_have_skills,nice_to_have_skills,location,min_salary,max_salary,employment_type
+A株式会社,バックエンドエンジニア,"Python,Flask,SQL","Docker,AWS",Tokyo,500,800,Full-time
+B株式会社,法人営業,法人営業経験1年,なし,Osaka,600,700,Full-time
+C株式会社,"飲食,販売",未経験歓迎,折衝経験,Nara,200,300,Part-time
+D株式会社,施工管理,未経験歓迎,施工管理各資格,Kagoshima,350,450,Full-time

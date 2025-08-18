@@ -1,0 +1,59 @@
+[
+  {
+    "title": "バックエンドエンジニア",
+    "company": "A株式会社",
+    "must_have_skills": [
+      "Python",
+      "Flask",
+      "SQL"
+    ],
+    "nice_to_have_skills": [
+      "Docker",
+      "AWS"
+    ],
+    "location": "Tokyo",
+    "min_salary": 500,
+    "max_salary": 800,
+    "employment_type": "Full-time"
+  },
+  {
+    "title": "法人営業",
+    "company": "B株式会社",
+    "must_have_skills": [
+      "法人営業経験1年"
+    ],
+    "nice_to_have_skills": [],
+    "location": "Osaka",
+    "min_salary": 600,
+    "max_salary": 700,
+    "employment_type": "Full-time"
+  },
+  {
+    "title": "飲食,販売",
+    "company": "C株式会社",
+    "must_have_skills": [
+      "未経験歓迎"
+    ],
+    "nice_to_have_skills": [
+      "折衝経験"
+    ],
+    "location": "Nara",
+    "min_salary": 200,
+    "max_salary": 300,
+    "employment_type": "Part-time"
+  },
+  {
+    "title": "施工管理",
+    "company": "D株式会社",
+    "must_have_skills": [
+      "未経験歓迎"
+    ],
+    "nice_to_have_skills": [
+      "施工管理各資格"
+    ],
+    "location": "Kagoshima",
+    "min_salary": 350,
+    "max_salary": 450,
+    "employment_type": "Full-time"
+  }
+]
