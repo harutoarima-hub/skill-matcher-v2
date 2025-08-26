@@ -93,3 +93,29 @@ def rename_candidates_sequential():
         c.name = names[i] if i < len(names) else f"候補者{i+1}"
     db.session.commit()
     return jsonify({"renamed": min(len(cands), len(names)), "total": len(cands)})
+
+# app/pages.py（新規でも、routes.py に追記でもOK）
+from flask import Blueprint, render_template, request, abort
+from .models import Job, Candidate
+from .match import rank_for_job
+
+pages = Blueprint("pages", __name__)
+
+@pages.get("/job")
+def job_page():
+    jobs = Job.query.order_by(Job.id.asc()).all()
+    return render_template("jobs.html", jobs=jobs)
+
+@pages.get("/match")
+def match_page():
+    job_id = request.args.get("job_id", type=int)
+    if not job_id:
+        # job を選ばせる画面にしたい場合は jobs を渡して一覧表示
+        jobs = Job.query.order_by(Job.id.asc()).all()
+        return render_template("match.html", jobs=jobs, matches=[])
+    job = Job.query.get(job_id)
+    if not job:
+        abort(404)
+    ranked = rank_for_job(job, Candidate.query.all())
+    # ranked は [{'candidate': {...}, 'score': 0.83}, ...] の想定でOK
+    return render_template("match.html", job=job, matches=ranked)

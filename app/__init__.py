@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from .db import init_db
+from .db import init_db, db  # ★★★ db を追加でインポートします ★★★
 from .routes import api
 
 def create_app():
@@ -29,3 +29,12 @@ def create_app():
     return app
 
 app = create_app()
+
+# ↓↓↓ この部分をファイルの末尾に追加します ↓↓↓
+@app.cli.command("init-db")
+def init_db_command():
+    """データベースのテーブルを作成します。"""
+    with app.app_context():
+        db.create_all()
+    print("データベースのテーブルを作成しました。")
+# ↑↑↑ ここまでを追加 ↑↑↑
