@@ -66,3 +66,33 @@ def rank_for_job(job: Job, candidates):
         },"score": s,"reasons": r})
     items.sort(key=lambda x: x["score"], reverse=True)
     return items
+
+def calculate_match_score(user_skills, must_haves, nice_to_haves):
+    """一人のユーザーと一つの求人のマッチスコアを計算する"""
+    score = 0
+    reasons = []
+    
+    user_skills_set = set(user_skills or [])
+    must_haves_set = set(must_haves or [])
+    nice_to_haves_set = set(nice_to_haves or [])
+
+    # 必須スキルが一つでも欠けていたら、マッチしない (スコア0)
+    if not must_haves_set.issubset(user_skills_set):
+        missing = must_haves_set - user_skills_set
+        reasons.append(f"必須スキル不足: {', '.join(missing)}")
+        return 0, reasons
+
+    # 必須スキルは全て満たしている
+    if must_haves_set:
+        score += 0.5  # ベーススコア
+        reasons.append(f"必須スキルを全て満たしています: {', '.join(must_haves_set)}")
+
+    # あれば嬉しいスキル（加点）
+    matched_nice_to_haves = user_skills_set.intersection(nice_to_haves_set)
+    if matched_nice_to_haves:
+        # あれば嬉しいスキルのうち、持っている割合に応じてスコアを加算 (最大0.5点)
+        bonus_score = 0.5 * (len(matched_nice_to_haves) / len(nice_to_haves_set))
+        score += bonus_score
+        reasons.append(f"加点スキル: {', '.join(matched_nice_to_haves)}")
+        
+    return round(score, 2), reasons

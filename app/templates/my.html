@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>あなたの情報を入力</h1>
+<p class="small">あなたのスキル情報を入力して、最適な求人を見つけましょう。</p>
+
+<div class="card">
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div>
+      <label for="my-name" class="small">名前</label>
+      <input id="my-name" class="input" type="text" placeholder="例: 鈴木 一郎">
+    </div>
+    <div>
+      <label for="my-skills" class="small">スキル（カンマ区切りで入力）</label>
+      <input id="my-skills" class="input" type="text" placeholder="例: Python,Flask,Docker">
+    </div>
+    <div style="text-align: right;">
+      <button id="my-match-btn" class="btn">この条件でマッチング</button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div id="my-match-result" class="small">ここにマッチング結果が表示されます。</div>
+</div>
+
+
+<script>
+// この後のステップで、ここにJavaScriptを記述します
+</script>
+
+{% endblock %}
