@@ -26,19 +26,3 @@ class Job(db.Model):
             'experience_years': self.experience_years,
             'nice_to_have': self.nice_to_have or [],
         }
-
-class Candidate(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    
-    # 求職者も同様に評価項目を拡張
-    skills = db.Column(db.JSON)
-    qualifications = db.Column(db.JSON)
-    experience_years = db.Column(db.Integer, default=0)
-    
-    def to_dict(self):
-         return {
-            'id': self.id, 'name': self.name, 'skills': self.skills or [],
-            'qualifications': self.qualifications or [],
-            'experience_years': self.experience_years,
-        }

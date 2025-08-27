@@ -8,24 +8,19 @@ def create_app():
 
     app.register_blueprint(api, url_prefix="/api")
 
+    # ▼▼▼ トップページで情報入力画面(my.html)を表示するように変更 ▼▼▼
     @app.route("/")
-    def index():
-        return render_template("index.html")
+    def my_profile_page():
+        return render_template("my.html")
 
     @app.route("/jobs")
     def jobs_page():
         return render_template("jobs.html")
 
-    @app.route("/candidates")
-    def candidates_page():
-        return render_template("candidates.html")
+    # ▼▼▼ /candidates のルートを削除しました ▼▼▼
 
     @app.route("/match")
     def match_page():
         return render_template("match.html")
-    
-    @app.route("/my-profile")
-    def my_profile_page():
-        return render_template("my.html")
 
     return app

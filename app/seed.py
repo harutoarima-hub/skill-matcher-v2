@@ -1,10 +1,13 @@
 from .db import db
-from .models import Job, Candidate
+from .models import Job
+import random
 
 def seed_data():
-    db.session.query(Candidate).delete()
+    """データベースに初期データを投入する関数"""
+    
+    # Jobデータのみを削除
     db.session.query(Job).delete()
-
+    
     # --- 多様な業種の求人データ ---
     jobs_to_add = [
         # 飲食
@@ -28,17 +31,10 @@ def seed_data():
             required_skills=['Python', 'AWS', 'Docker'], required_qualifications=[], experience_years=3, 
             nice_to_have=['Go言語'])
     ]
-
-    # --- 多様なスキルセットを持つ候補者データ ---
-    candidates_to_add = [
-        Candidate(name='佐藤 圭介', skills=['接客経験', '英語対応', 'ソムリエ資格'], qualifications=['ソムリエ資格'], experience_years=5),
-        Candidate(name='高橋 美咲', skills=['販売経験', 'VMD経験', '在庫管理'], qualifications=[], experience_years=3),
-        Candidate(name='田中 誠', skills=['身体介助', '生活援助', 'レクリエーション企画'], qualifications=['介護福祉士', '普通自動車免許'], experience_years=5),
-        Candidate(name='伊藤 優子', skills=['Word', 'Excel', 'PowerPoint', '電話対応'], qualifications=['簿記3級'], experience_years=1),
-        Candidate(name='渡辺 拓也', skills=['Python', 'AWS', 'Docker', 'Go言語'], qualifications=[], experience_years=4)
-    ]
     
+    # Jobデータのみをデータベースセッションに追加
     db.session.add_all(jobs_to_add)
-    db.session.add_all(candidates_to_add)
+    
+    # 変更をデータベースにコミット
     db.session.commit()
     print(f"{len(jobs_to_add)}件の多様な求人データを投入しました。")
