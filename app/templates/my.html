@@ -2,17 +2,21 @@
 {% block content %}
 
 <h1>あなたの情報を入力</h1>
-<p class="small">あなたのスキル情報を入力して、最適な求人を見つけましょう。</p>
+<p class="small">あなたのスキルや経験を入力して、最適な求人を見つけましょう。</p>
 
 <div class="card">
   <div style="display: flex; flex-direction: column; gap: 12px;">
     <div>
-      <label for="my-name" class="small">名前</label>
-      <input id="my-name" class="input" type="text" placeholder="例: 鈴木 一郎">
+      <label for="my-skills" class="small">スキル・経験（カンマ区切り）</label>
+      <input id="my-skills" class="input" type="text" placeholder="例: 接客経験,基本的なPC操作,英語対応">
     </div>
     <div>
-      <label for="my-skills" class="small">スキル（カンマ区切りで入力）</label>
-      <input id="my-skills" class="input" type="text" placeholder="例: Python,Flask,Docker">
+      <label for="my-qualifications" class="small">保有資格（カンマ区切り）</label>
+      <input id="my-qualifications" class="input" type="text" placeholder="例: 介護福祉士,普通自動車免許">
+    </div>
+    <div>
+      <label for="my-experience" class="small">関連する経験年数</label>
+      <input id="my-experience" class="input" type="number" min="0" placeholder="例: 5">
     </div>
     <div style="text-align: right;">
       <button id="my-match-btn" class="btn">この条件でマッチング</button>
@@ -24,9 +28,69 @@
   <div id="my-match-result" class="small">ここにマッチング結果が表示されます。</div>
 </div>
 
-
 <script>
-// この後のステップで、ここにJavaScriptを記述します
+(function() {
+  const skillsInput = document.getElementById('my-skills');
+  const qualificationsInput = document.getElementById('my-qualifications');
+  const experienceInput = document.getElementById('my-experience');
+  const matchBtn = document.getElementById('my-match-btn');
+  const resultArea = document.getElementById('my-match-result');
+
+  matchBtn.addEventListener('click', function() {
+    const candidateData = {
+      skills: skillsInput.value,
+      qualifications: qualificationsInput.value,
+      experience_years: experienceInput.value || '0'
+    };
+
+    if (!candidateData.skills && !candidateData.qualifications) {
+      alert('スキルか資格を少なくとも一つ入力してください。');
+      return;
+    }
+    
+    resultArea.textContent = 'マッチング計算中...';
+
+    fetch('/api/match/ad_hoc', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(candidateData),
+    })
+    .then(response => response.json())
+    .then(data => {
+      renderResults(data.results || []);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      resultArea.textContent = 'エラーが発生しました。';
+    });
+  });
+
+  function renderResults(results) {
+    if (results.length === 0) {
+      resultArea.textContent = 'マッチする求人が見つかりませんでした。';
+      return;
+    }
+
+    let tableHTML = `<table class="table">
+      <tr><th>業種</th><th>求人</th><th>スコア</th><th>マッチ理由</th></tr>`;
+    
+    results.forEach(res => {
+      const job = res.job;
+      const score = res.score;
+      const color = (score >= 0.8 ? '#22c55e' : (score >= 0.5 ? '#eab308' : '#ef4444'));
+      
+      tableHTML += `<tr>
+        <td><span class="badge">${job.sector || ''}</span></td>
+        <td><b>${job.title || ''}</b><br><span class="small">${job.company || ''}</span></td>
+        <td style="font-weight:700; color:${color}; font-size:1.2em;">${Math.round(score * 100)}点</td>
+        <td class="small">${res.reasons.join('<br>') || ''}</td>
+      </tr>`;
+    });
+
+    tableHTML += '</table>';
+    resultArea.innerHTML = tableHTML;
+  }
+})();
 </script>
 
 {% endblock %}

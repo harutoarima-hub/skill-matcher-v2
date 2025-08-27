@@ -1,28 +1,44 @@
 from .db import db
 from sqlalchemy.types import JSON
-from sqlalchemy import Text
 
 class Job(db.Model):
-    __tablename__ = "job"
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
-    company = db.Column(db.String(255), default='')
-    # 互換のため salary も定義（古い参照が残っても落ちないように）
-    salary = db.Column(db.String(255))
-    must_have_skills = db.Column(JSON, default=list)
-    nice_to_have_skills = db.Column(JSON, default=list)
-    location = db.Column(db.String(255))
-    min_salary = db.Column(db.Integer, default=0)
-    max_salary = db.Column(db.Integer, default=0)
-    employment_type = db.Column(db.String(40), default='Full-time')
-    description = db.Column(Text, default='')
+    title = db.Column(db.String(100), nullable=False)
+    sector = db.Column(db.String(50)) # 業種
+    company = db.Column(db.String(100))
+    location = db.Column(db.String(100))
+    min_salary = db.Column(db.Integer)
+    max_salary = db.Column(db.Integer)
+    
+    # 評価項目を柔軟なJSON形式に変更
+    required_skills = db.Column(db.JSON)      # 必須スキル・経験
+    required_qualifications = db.Column(db.JSON) # 必須資格
+    experience_years = db.Column(db.Integer, default=0) # 必須経験年数
+    nice_to_have = db.Column(db.JSON)         # あれば歓迎される項目
+
+    def to_dict(self):
+        return {
+            'id': self.id, 'title': self.title, 'sector': self.sector,
+            'company': self.company, 'location': self.location,
+            'min_salary': self.min_salary, 'max_salary': self.max_salary,
+            'required_skills': self.required_skills or [],
+            'required_qualifications': self.required_qualifications or [],
+            'experience_years': self.experience_years,
+            'nice_to_have': self.nice_to_have or [],
+        }
 
 class Candidate(db.Model):
-    __tablename__ = "candidate"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
-    skills = db.Column(JSON, default=list)
-    years = db.Column(db.Integer, default=0)
-    desired_location = db.Column(db.String(80), default='Tokyo')
-    desired_min_salary = db.Column(db.Integer, default=0)
-    availability = db.Column(db.String(40), default='immediate')
+    name = db.Column(db.String(100), nullable=False)
+    
+    # 求職者も同様に評価項目を拡張
+    skills = db.Column(db.JSON)
+    qualifications = db.Column(db.JSON)
+    experience_years = db.Column(db.Integer, default=0)
+    
+    def to_dict(self):
+         return {
+            'id': self.id, 'name': self.name, 'skills': self.skills or [],
+            'qualifications': self.qualifications or [],
+            'experience_years': self.experience_years,
+        }
