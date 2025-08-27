@@ -1,34 +1,44 @@
-﻿{% extends 'base.html' %}{% block content %}
-<h1>Jobs</h1>
-<div id='list'>Loading...</div>
+﻿{% extends 'base.html' %}
+{% block content %}
+
+<h1>求人一覧</h1>
+<div id="job-list" class="small">求人情報を読み込んでいます...</div>
+
 <script>
-(function(){
-  fetch('/api/jobs').then(function(r){return r.json()}).then(function(arr){
-    var html=''; 
-    for(var i=0;i<arr.length;i++){
-      var j=arr[i];
-      var must=(j.must_have_skills||[]).map(function(s){return '<span class=\"badge\">'+s+'</span>'}).join(' ');
-      var nice=(j.nice_to_have_skills||[]).map(function(s){return '<span class=\"badge\">'+s+'</span>'}).join(' ');
-      html+=
-        '<div class=\"card\">'+
-          '<div style=\"display:flex;justify-content:space-between;gap:8px;align-items:center;\">'+
-            '<div><b>'+(j.title||'')+'</b> <span class=\"small\">/ '+(j.company||'')+'</span></div>'+
-            '<div class=\"small\">ID: '+j.id+'</div>'+
-          '</div>'+
-          '<div class=\"kv\" style=\"margin-top:8px\">'+
-            '<div>勤務地: '+(j.location||'')+'</div>'+
-            '<div>雇用: '+(j.employment_type||'')+'</div>'+
-            '<div>年収: '+((j.min_salary||0))+'〜'+((j.max_salary||0))+' 万円</div>'+
-          '</div>'+
-          '<div style=\"margin-top:10px\"><div class=\"small\">必須</div><div>'+ (must||'<span class=\"small\">（未設定）</span>') +'</div></div>'+
-          '<div style=\"margin-top:8px\"><div class=\"small\">歓迎</div><div>'+ (nice||'<span class=\"small\">（未設定）</span>') +'</div></div>'+
-        '</div>';
-    }
-    document.getElementById('list').innerHTML=html;
-  }).catch(function(e){
-    document.getElementById('list').textContent='読み込みエラー: '+e;
-    console.error(e);
-  });
+(function() {
+  const jobListArea = document.getElementById('job-list');
+
+  // ページの読み込み時に /api/jobs から求人データを取得
+  fetch('/api/jobs')
+    .then(response => response.json())
+    .then(jobs => {
+      if (!jobs || jobs.length === 0) {
+        jobListArea.textContent = '現在、求人はありません。';
+        return;
+      }
+      
+      // 取得した求人データを元にカードを作成
+      let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+      jobs.forEach(job => {
+        html += `<div class="card">
+          <h2>${job.title || ''} <span class="badge">${job.sector || ''}</span></h2>
+          <div class="small" style="margin-bottom: 12px;">${job.company || ''} - ${job.location || ''}</div>
+          <div><b>必須スキル・経験:</b></div>
+          <div class="small" style="margin-bottom: 12px;">${(job.required_skills || []).join(', ')}</div>
+          <div><b>必須資格:</b></div>
+          <div class="small" style="margin-bottom: 12px;">${(job.required_qualifications || []).join(', ')}</div>
+          <div><b>必須経験年数:</b> ${job.experience_years || 0}年</div>
+        </div>`;
+      });
+      html += '</div>';
+
+      jobListArea.innerHTML = html;
+    })
+    .catch(error => {
+      console.error('求人情報の読み込みに失敗しました:', error);
+      jobListArea.textContent = '求人情報の読み込み中にエラーが発生しました。';
+    });
 })();
 </script>
+
 {% endblock %}
