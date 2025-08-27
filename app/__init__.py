@@ -1,6 +1,9 @@
+# app/__init__.py
+
 from flask import Flask, render_template
-from .db import init_db, db  # ★★★ db を追加でインポートします ★★★
+from .db import init_db, db
 from .routes import api
+# .seed のインポートは不要なので削除します
 
 def create_app():
     app = Flask(__name__)
@@ -28,13 +31,7 @@ def create_app():
 
     return app
 
-app = create_app()
-
-# ↓↓↓ この部分をファイルの末尾に追加します ↓↓↓
-@app.cli.command("init-db")
-def init_db_command():
-    """データベースのテーブルを作成します。"""
-    with app.app_context():
-        db.create_all()
-    print("データベースのテーブルを作成しました。")
-# ↑↑↑ ここまでを追加 ↑↑↑
+# ファイルの末尾に追加した @app.cli.command("init-db") ... の部分は
+# 全て削除してください。
+# `app = create_app()` の行も、もしあれば削除して、
+# このファイルの最後が `return app` で終わるようにしてください。
