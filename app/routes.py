@@ -9,15 +9,16 @@ api = Blueprint("api", __name__)
 def list_jobs():
     return jsonify([j.to_dict() for j in Job.query.all()])
 
-# /import/jobs は変更なし
 @api.post("/import/jobs")
 def import_jobs():
     items = request.get_json(force=True)
-    # ... (この関数の内容は変更なし) ...
+    if not isinstance(items, list):
+        return jsonify({"error":"list expected"}), 400
+    # ... (この関数の内容は変更ありません)
+    # ...
     db.session.commit()
     return jsonify({"created": len(items)}), 201
 
-# /match/ad_hoc は変更なし
 @api.route('/match/ad_hoc', methods=['POST'])
 def ad_hoc_match():
     data = request.get_json(force=True)
@@ -44,3 +45,4 @@ def ad_hoc_match():
 
     results.sort(key=lambda x: x['score'], reverse=True)
     return jsonify({'results': results})
+
