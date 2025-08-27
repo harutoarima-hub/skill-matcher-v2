@@ -6,10 +6,10 @@
 <style>
 /* ライトテーマをデフォルトに設定 */
 :root {
-  --bg: #ffffff; /* 背景: 白 */
-  --fg: #111827; /* 文字: 濃いグレー */
-  --muted: #6b7280; /* やや薄い文字 */
-  --card: #f9fafb; /* カード背景: ごく薄いグレー */
+  --bg: #f9fafb; /* 背景: ごく薄いグレー */
+  --fg: #111827; /* 文字: 濃い黒に近いグレー */
+  --muted: #4b5563; /* やや薄い文字(ヘッダーリンク用): はっきりと見えるグレー */
+  --card: #ffffff; /* カード背景: 白 */
   --brand: #4f46e5; /* ブランドカラー */
   --ok: #16a34a;
   --bad: #dc2626;
@@ -53,15 +53,4 @@ h1,h2{margin:16px 0}
 
 <nav><div class="inner">
   <div class="brand">⚙️ Skill Matcher</div>
-  <a href="/" class="{{ 'active' if request.path=='/' else '' }}"><b>情報入力 & Match</b></a>
-  <a href="/jobs" class="{{ 'active' if request.path.startswith('/jobs') else '' }}">求人一覧</a>
-  <a href="/match" class="{{ 'active' if request.path.startswith('/match') else '' }}">旧Matchページ</a>
-  <span class="small" style="margin-left:auto">© Demo – made with Flask</span>
-</div></nav>
-
-<div class="container">
-  {% block content %}{% endblock %}
-</div>
-
-</body>
-</html>
+  <a href="/" class="{{ 'active' if request.path=='/' else '' }}">
