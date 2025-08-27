@@ -37,6 +37,9 @@ h1,h2{margin:16px 0}
   <a href="/jobs" class="{{ 'active' if request.path.startswith('/jobs') else '' }}">Jobs</a>
   <a href="/candidates" class="{{ 'active' if request.path.startswith('/candidates') else '' }}">Candidates</a>
   <a href="/match" class="{{ 'active' if request.path.startswith('/match') else '' }}">Match</a>
+  
+  <a href="/my-profile" class="{{ 'active' if request.path.startswith('/my-profile') else '' }}"><b>My Info & Match</b></a>
+
   <span class="small" style="margin-left:auto">SQLite / Flask / JSON API</span>
 </div></nav>
 <div class="container">

@@ -36,16 +36,6 @@ def import_candidates():
     return jsonify({"created": len(items)}), 201
 
 
-@api.get("/match")
-def match_for_job():
-    job_id = request.args.get("job_id", type=int)
-    if not job_id:
-        return jsonify({"error":"job_id is required"}), 400
-    job = Job.query.get_or_404(job_id)
-    ranked = rank_for_job(job, Candidate.query.all())
-    # Jobモデルのto_dict()を使うように変更
-    return jsonify({"job": job.to_dict(), "results": ranked})
-
 # ▼▼▼ 変更点2: この新しいAPIルートをまるごと追加 ▼▼▼
 @api.route('/match/ad_hoc', methods=['POST'])
 def ad_hoc_match():

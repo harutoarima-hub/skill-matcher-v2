@@ -29,9 +29,11 @@ def create_app():
     def match_page():
         return render_template("match.html")
 
-    return app
+    @app.route("/my-profile")
+    def my_profile_page():
+        return render_template("my.html")
 
-# ファイルの末尾に追加した @app.cli.command("init-db") ... の部分は
-# 全て削除してください。
-# `app = create_app()` の行も、もしあれば削除して、
-# このファイルの最後が `return app` で終わるようにしてください。
+    
+
+    return app
+、
