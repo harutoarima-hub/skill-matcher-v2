@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from .db import db
 from .models import Job, Candidate
 # ▼▼▼ 変更点1: 新しいマッチング関数をインポート ▼▼▼
-from .match import rank_for_job, calculate_holistic_score
+from .match import calculate_holistic_score
 
 api = Blueprint("api", __name__)
 
