@@ -53,4 +53,15 @@ h1,h2{margin:16px 0}
 
 <nav><div class="inner">
   <div class="brand">⚙️ Skill Matcher</div>
-  <a href="/" class="{{ 'active' if request.path=='/' else '' }}">
+  <a href="/" class="{{ 'active' if request.path=='/' else '' }}"><b>情報入力 & Match</b></a>
+  <a href="/jobs" class="{{ 'active' if request.path.startswith('/jobs') else '' }}">求人一覧</a>
+  <a href="/match" class="{{ 'active' if request.path.startswith('/match') else '' }}">旧Matchページ</a>
+  <span class="small" style="margin-left:auto">© Demo – made with Flask</span>
+</div></nav>
+
+<div class="container">
+  {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>
