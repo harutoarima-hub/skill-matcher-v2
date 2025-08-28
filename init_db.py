@@ -1,18 +1,22 @@
 # init_db.py
 
 import traceback
-
 from app import create_app, db
-from app.seed import seed_data
 
 print("--- [START] データベース初期化スクリプト ---")
 
 try:
     app = create_app()
     with app.app_context():
-        print(" -> テーブルを作成しています...")
-        db.create_all()
-        
+        # アプリの準備が整った後で seed_data をインポートします
+        from app.seed import seed_data
+
+        print(" -> [!!!] 既存のテーブルを全て削除します...")
+        db.drop_all()  # ← この行を追加
+
+        print(" -> 新しい設計でテーブルを作成しています...")
+        db.create_all()  # ← この行で新しいテーブルが作られる
+
         print(" -> 初期データを投入しています...")
         seed_data()
 
@@ -20,6 +24,5 @@ try:
 
 except Exception as e:
     print("--- [ERROR] データベース初期化中にエラーが発生しました ---")
-    # 詳細なエラー内容をログに出力します
     traceback.print_exc()
     print("----------------------------------------------------")
