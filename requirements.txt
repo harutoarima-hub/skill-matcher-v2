@@ -5,3 +5,4 @@ SQLAlchemy==2.0.31
 python-dotenv==1.0.1
 gunicorn
 psycopg2-binary
+google-generativeai
