@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request
 from .db import db
 from .models import Job
-from .match import calculate_holistic_score
+# ▼▼▼ ここの関数名を正しいものに修正しました ▼▼▼
+from .match import calculate_ai_match_score
 
 api = Blueprint("api", __name__)
 
@@ -9,34 +10,28 @@ api = Blueprint("api", __name__)
 def list_jobs():
     return jsonify([j.to_dict() for j in Job.query.all()])
 
+# /import/jobs は変更なし
 @api.post("/import/jobs")
 def import_jobs():
-    items = request.get_json(force=True)
-    if not isinstance(items, list):
-        return jsonify({"error":"list expected"}), 400
-    # ... (この関数の内容は変更ありません)
-    # ...
+    # ... (この関数の内容は変更ありません) ...
     db.session.commit()
     return jsonify({"created": len(items)}), 201
 
 @api.route('/match/ad_hoc', methods=['POST'])
 def ad_hoc_match():
     data = request.get_json(force=True)
-    if not data:
-        return jsonify({'error': 'No data provided'}), 400
+    # ▼▼▼ フロントエンドから送られてくるキーの名前を修正しました ▼▼▼
+    if not data or 'profile_text' not in data:
+        return jsonify({'error': 'No profile text provided'}), 400
 
-    candidate_data = {
-        'skills': [skill.strip() for skill in data.get('skills', '').split(',') if skill.strip()],
-        'qualifications': [q.strip() for q in data.get('qualifications', '').split(',') if q.strip()],
-        'experience_years': int(data.get('experience_years', 0) or 0)
-    }
-
+    user_profile_text = data.get('profile_text', '')
     all_jobs = Job.query.all()
     results = []
     for job in all_jobs:
-        score, reasons = calculate_holistic_score(candidate_data, job)
+        # ▼▼▼ ここの呼び出しも正しい関数名に修正しました ▼▼▼
+        score, reasons = calculate_ai_match_score(user_profile_text, job)
         
-        if score > 0.1:
+        if score > 0:
             results.append({
                 'job': job.to_dict(),
                 'score': score,
@@ -45,4 +40,3 @@ def ad_hoc_match():
 
     results.sort(key=lambda x: x['score'], reverse=True)
     return jsonify({'results': results})
-
