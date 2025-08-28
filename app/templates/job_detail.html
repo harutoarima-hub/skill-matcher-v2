@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card">
+  <h1>{{ job.title }} <span class="badge">{{ job.sector }}</span></h1>
+  <div class="small" style="margin-bottom: 24px;">{{ job.company }} - {{ job.location }}</div>
+  
+  <div class="kv" style="margin-bottom: 24px;">
+    <div><b>給与:</b> {{ job.min_salary }} 〜 {{ job.max_salary }} 万円</div>
+  </div>
+
+  <h2 style="font-size: 1.2em; border-bottom: 1px solid var(--border); padding-bottom: 8px;">仕事内容</h2>
+  <div class="small" style="white-space: pre-wrap; margin-bottom: 24px;">{{ job.description }}</div>
+
+  <h2 style="font-size: 1.2em; border-bottom: 1px solid var(--border); padding-bottom: 8px;">必須要件</h2>
+  <div class="small" style="white-space: pre-wrap; margin-bottom: 24px;">{{ job.requirements }}</div>
+
+  <h2 style="font-size: 1.2em; border-bottom: 1px solid var(--border); padding-bottom: 8px;">歓迎要件</h2>
+  <div class="small" style="white-space: pre-wrap; margin-bottom: 24px;">{{ job.welcome_requirements }}</div>
+
+  <div>
+    {% for keyword in job.keywords %}
+      <span class="badge">{{ keyword }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<a href="/jobs" class="small">← 求人一覧に戻る</a>
+
+{% endblock %}

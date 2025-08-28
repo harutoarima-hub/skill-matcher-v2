@@ -8,7 +8,6 @@
 (function() {
   const jobListArea = document.getElementById('job-list');
 
-  // ページの読み込み時に /api/jobs から求人データを取得
   fetch('/api/jobs')
     .then(response => response.json())
     .then(jobs => {
@@ -17,17 +16,14 @@
         return;
       }
       
-      // 取得した求人データを元にカードを作成
       let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
       jobs.forEach(job => {
+        // ▼▼▼ h2タグをaタグで囲み、リンクを追加しました ▼▼▼
         html += `<div class="card">
-          <h2>${job.title || ''} <span class="badge">${job.sector || ''}</span></h2>
-          <div class="small" style="margin-bottom: 12px;">${job.company || ''} - ${job.location || ''}</div>
-          <div><b>必須スキル・経験:</b></div>
-          <div class="small" style="margin-bottom: 12px;">${(job.required_skills || []).join(', ')}</div>
-          <div><b>必須資格:</b></div>
-          <div class="small" style="margin-bottom: 12px;">${(job.required_qualifications || []).join(', ')}</div>
-          <div><b>必須経験年数:</b> ${job.experience_years || 0}年</div>
+          <a href="/job/${job.id}" style="text-decoration: none; color: inherit;">
+            <h2>${job.title || ''} <span class="badge">${job.sector || ''}</span></h2>
+          </a>
+          <div class="small">${job.company || ''} - ${job.location || ''}</div>
         </div>`;
       });
       html += '</div>';

@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from .db import init_db, db
 from .routes import api # routes.py から api をインポート
+from .models import Job
 
 def create_app():
     app = Flask(__name__)
@@ -16,5 +17,11 @@ def create_app():
     @app.route("/jobs")
     def jobs_page():
         return render_template("jobs.html")
+
+ # ▼▼▼ このブロックを追加 ▼▼▼
+    @app.route("/job/<int:job_id>")
+    def job_detail_page(job_id):
+        job = Job.query.get_or_404(job_id)
+        return render_template("job_detail.html", job=job)
 
     return app
