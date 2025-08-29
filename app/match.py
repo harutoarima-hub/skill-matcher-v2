@@ -2,13 +2,17 @@ import os
 import json
 import google.generativeai as genai
 
-# Gemini APIキーをRenderの環境変数から読み込む
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
+keyword_cache = {}
+
 def extract_keywords_with_gemini(text):
-    """Geminiを使って、文章からキーワードをJSON形式で抽出する"""
+    """【API呼び出し担当】Geminiを使って、文章からキーワードを抽出する"""
     if not text:
         return set()
+    if text in keyword_cache:
+        print("--- [CACHE HIT] 保存された結果を返します ---")
+        return keyword_cache[text]
     try:
         prompt = f"""
         以下の文章は、ある人物の自己PRです。
@@ -18,29 +22,20 @@ def extract_keywords_with_gemini(text):
         文章:
         "{text}"
         """
-        # ▼▼▼ モデル名を常に最新版に ▼▼▼
-        model_name = os.environ.get("GEMINI_MODEL_NAME", "gemini-1.5-flash-latest")
-        model = genai.GenerativeModel(model_name)
-        
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content(prompt)
-        
         result_text = response.text.strip().replace("```json", "").replace("```", "")
-        
         keywords_data = json.loads(result_text)
-        keywords_list = keywords_data.get("keywords", [])
-        
-        return set(keywords_list)
-
+        result_set = set(keywords_data.get("keywords", []))
+        keyword_cache[text] = result_set
+        return result_set
     except Exception as e:
         print(f"Gemini API呼び出し中にエラーが発生しました: {e}")
         return set()
 
-def calculate_ai_match_score(user_profile_text, job):
-    """Geminiで抽出したキーワードを使ってマッチ度を計算する"""
-    
-    user_keywords = extract_keywords_with_gemini(user_profile_text)
+def calculate_similarity_score(user_keywords, job):
+    """【スコア計算担当】キーワードを使ってマッチ度を計算する（API呼び出しなし）"""
     job_keywords = set(job.keywords or [])
-    
     if not user_keywords or not job_keywords:
         return 0, ["キーワードが見つかりません"]
 
