@@ -1,53 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>あなたの情報を入力</h1>
+<p class="small">これまでの経験、スキル、資格、希望などを自由に記述してください。AIが内容を解析し、最適な求人を推薦します。</p>
+
+<div class="card">
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div>
+      <label for="my-profile-text" class="small">自己PR・経歴・スキルなど</label>
+      <textarea id="my-profile-text" class="input" rows="10" placeholder="例：3年間、飲食店のホールスタッフとして接客経験を積みました。基本的なPC操作（Word, Excel）も可能です。お客様とのコミュニケーションが得意で、将来的には店長を目指したいと考えています。希望勤務地は東京です。"></textarea>
+    </div>
+    <div style="text-align: right;">
+      <button id="my-match-btn" class="btn">AIマッチング実行</button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div id="my-match-result" class="small">ここにマッチング結果が表示されます。</div>
+</div>
+
 <script>
-// ▼▼▼ この行を追加 ▼▼▼
 document.addEventListener('DOMContentLoaded', function() {
-  // --- ここから下は既存のコード ---
   const profileInput = document.getElementById('my-profile-text');
   const matchBtn = document.getElementById('my-match-btn');
   const resultArea = document.getElementById('my-match-result');
 
-  matchBtn.addEventListener('click', function() {
-    const userProfileText = profileInput.value;
-    if (!userProfileText) {
-      alert('自己PRを入力してください。');
-      return;
-    }
-    resultArea.textContent = 'AIが解析中...';
+  // このページにマッチボタンが存在する場合のみ、イベントリスナーを追加
+  if (matchBtn) {
+    matchBtn.addEventListener('click', function() {
+      const userProfileText = profileInput.value;
+      if (!userProfileText) {
+        alert('自己PRを入力してください。');
+        return;
+      }
+      resultArea.textContent = 'AIが解析中...';
 
-    fetch('/api/match/ad_hoc', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ profile_text: userProfileText }),
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-      renderResults(data.results || []);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      resultArea.textContent = 'エラーが発生しました。詳細はコンソールを確認してください。';
+      fetch('/api/match/ad_hoc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile_text: userProfileText }),
+      })
+      .then(response => response.ok ? response.json() : Promise.reject(response))
+      .then(data => {
+        renderResults(data.results || []);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        resultArea.textContent = 'エラーが発生しました。詳細はコンソールを確認してください。';
+      });
     });
-  });
+  }
 
   function renderResults(results) {
     if (results.length === 0) {
       resultArea.textContent = 'マッチする求人が見つかりませんでした。';
       return;
     }
-
     let tableHTML = `<table class="table">
       <tr><th>業種</th><th>求人</th><th>スコア</th><th>マッチ理由</th></tr>`;
-    
     results.forEach(res => {
       const job = res.job;
       const score = res.score;
       const color = (score >= 0.8 ? '#22c55e' : (score >= 0.5 ? '#eab308' : '#ef4444'));
-      
       tableHTML += `<tr>
         <td><span class="badge">${job.sector || ''}</span></td>
         <td><a href="/job/${job.id}" style="text-decoration:none; color:inherit;"><b>${job.title || ''}</b></a><br><span class="small">${job.company || ''}</span></td>
@@ -55,10 +70,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <td class="small">${(res.reasons || []).join('<br>') || ''}</td>
       </tr>`;
     });
-
     tableHTML += '</table>';
     resultArea.innerHTML = tableHTML;
   }
-// ▼▼▼ この行を追加 ▼▼▼
 });
 </script>
+
+{% endblock %}

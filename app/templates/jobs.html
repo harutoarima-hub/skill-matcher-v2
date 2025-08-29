@@ -5,36 +5,38 @@
 <div id="job-list" class="small">求人情報を読み込んでいます...</div>
 
 <script>
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
   const jobListArea = document.getElementById('job-list');
 
-  fetch('/api/jobs')
-    .then(response => response.json())
-    .then(jobs => {
-      if (!jobs || jobs.length === 0) {
-        jobListArea.textContent = '現在、求人はありません。';
-        return;
-      }
-      
-      let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
-      jobs.forEach(job => {
-        // ▼▼▼ h2タグをaタグで囲み、リンクを追加しました ▼▼▼
-        html += `<div class="card">
-          <a href="/job/${job.id}" style="text-decoration: none; color: inherit;">
-            <h2>${job.title || ''} <span class="badge">${job.sector || ''}</span></h2>
-          </a>
-          <div class="small">${job.company || ''} - ${job.location || ''}</div>
-        </div>`;
-      });
-      html += '</div>';
+  // このページに求人一覧エリアが存在する場合のみ、APIを呼び出す
+  if (jobListArea) {
+    fetch('/api/jobs')
+      .then(response => response.ok ? response.json() : Promise.reject(response))
+      .then(jobs => {
+        if (!jobs || jobs.length === 0) {
+          jobListArea.textContent = '現在、求人はありません。';
+          return;
+        }
+        
+        let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+        jobs.forEach(job => {
+          html += `<div class="card">
+            <a href="/job/${job.id}" style="text-decoration: none; color: inherit;">
+              <h2>${job.title || ''} <span class="badge">${job.sector || ''}</span></h2>
+            </a>
+            <div class="small">${job.company || ''} - ${job.location || ''}</div>
+          </div>`;
+        });
+        html += '</div>';
 
-      jobListArea.innerHTML = html;
-    })
-    .catch(error => {
-      console.error('求人情報の読み込みに失敗しました:', error);
-      jobListArea.textContent = '求人情報の読み込み中にエラーが発生しました。';
-    });
-})();
+        jobListArea.innerHTML = html;
+      })
+      .catch(error => {
+        console.error('求人情報の読み込みに失敗しました:', error);
+        jobListArea.textContent = '求人情報の読み込み中にエラーが発生しました。';
+      });
+  }
+});
 </script>
 
 {% endblock %}
