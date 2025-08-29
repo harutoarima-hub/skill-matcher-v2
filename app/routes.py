@@ -20,7 +20,7 @@ def import_jobs():
 @api.route('/match/ad_hoc', methods=['POST'])
 def ad_hoc_match():
     data = request.get_json(force=True)
-    # ▼▼▼ フロントエンドから送られてくるキーの名前を修正しました ▼▼▼
+    # ▼▼▼ ここのチェックを 'skills' から 'profile_text' に修正しました ▼▼▼
     if not data or 'profile_text' not in data:
         return jsonify({'error': 'No profile text provided'}), 400
 
@@ -28,10 +28,10 @@ def ad_hoc_match():
     all_jobs = Job.query.all()
     results = []
     for job in all_jobs:
-        # ▼▼▼ ここの呼び出しも正しい関数名に修正しました ▼▼▼
+        # 新しいAIマッチングロジックを呼び出す
         score, reasons = calculate_ai_match_score(user_profile_text, job)
         
-        if score > 0:
+        if score > 0: # スコアが0より大きいものだけ表示
             results.append({
                 'job': job.to_dict(),
                 'score': score,
