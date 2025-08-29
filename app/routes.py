@@ -10,6 +10,7 @@ api = Blueprint("api", __name__)
 def list_jobs():
     return jsonify([j.to_dict() for j in Job.query.all()])
 
+
 @api.route('/match/ad_hoc', methods=['POST'])
 def ad_hoc_match():
     data = request.get_json(force=True)
@@ -18,16 +19,20 @@ def ad_hoc_match():
 
     user_profile_text = data.get('profile_text', '')
 
-    # ループの前に、一度だけAPIを呼び出す
     user_keywords = extract_keywords_with_gemini(user_profile_text)
+    
+    # ▼▼▼ このprint文を追加 ▼▼▼
+    print(f"--- Geminiが抽出したキーワード: {user_keywords} ---")
 
     all_jobs = Job.query.all()
     results = []
     for job in all_jobs:
-        # APIを呼び出さないスコア計算関数を使用
         score, reasons = calculate_similarity_score(user_keywords, job)
         
-        if score > 0:
+        # ▼▼▼ このprint文を追加 ▼▼▼
+        print(f"-> 求人'{job.title}'とのスコア: {score}")
+
+        if score > 0.1:
             results.append({
                 'job': job.to_dict(),
                 'score': score,
