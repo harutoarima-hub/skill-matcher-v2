@@ -18,7 +18,7 @@ def extract_keywords_with_gemini(text):
         文章:
         "{text}"
         """
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content(prompt)
         result_text = response.text.strip().replace("```json", "").replace("```", "")
         keywords_data = json.loads(result_text)
