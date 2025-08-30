@@ -50,7 +50,7 @@ def seed_data():
             "details": [
                 ("食事・入浴・移動の介助、レクリエーション", "介護福祉士資格", "普通自動車免許"),
                 ("ケアプラン作成、利用者様との面談", "介護支援専門員資格", "実務経験5年以上"),
-                ("利用者様のご自宅での身体介助・生活援助", "介護職員初任者研修", "自転車・バイク移動が可能な方")
+                ("利用者様のご自宅での身体介助・生活援助", "介護職員初-任者研修", "自転車・バイク移動が可能な方")
             ]
         },
         "事務": {
@@ -79,32 +79,26 @@ def seed_data():
         min_sal = random.randint(28, 65) * 10
         max_sal = min_sal + random.randint(10, 30) * 10
         
-        # description, requirements, welcome_reqs, keywordsを生成
         description = f"{company}での{title}のお仕事です。{details[0]}などを担当していただきます。"
         reqs_list = details[1].split(', ')
         welcome_reqs_list = details[2].split(', ')
         
-        # requirements の文字列を整形
         requirements_str = "\n".join([f"・{req}" for req in reqs_list])
         welcome_requirements_str = "\n".join([f"・{req}" for req in welcome_reqs_list])
         
-        # キーワードを生成
         keywords = [sector, location, title.split('（')[0]] + reqs_list + welcome_reqs_list
         
         job_data = {
-            "title": title,
-            "sector": sector,
-            "company": company,
-            "location": location,
-            "min_salary": min_sal,
-            "max_salary": max_sal,
-            "description": description,
-            "requirements": requirements_str,
-            "welcome_requirements": welcome_requirements_str,
-            "keywords": list(set(keywords)) # 重複を削除
+            "title": title, "sector": sector, "company": company, "location": location,
+            "min_salary": min_sal, "max_salary": max_sal, "description": description,
+            "requirements": requirements_str, "welcome_requirements": welcome_requirements_str,
+            "keywords": list(set(keywords))
         }
         jobs_to_add.append(Job(**job_data))
 
+    # ▼▼▼ 不要な行を削除しました ▼▼▼
+    # jobs_to_add = [Job(**data) for data in jobs_data]
+    
     db.session.add_all(jobs_to_add)
     db.session.commit()
     
