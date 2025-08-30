@@ -7,7 +7,7 @@ genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 keyword_cache = {}
 
 def extract_keywords_with_gemini(text):
-    """【API呼び出し担当】Geminiを使って、文章からキーワードを抽出する"""
+    # ... (この関数は変更ありません) ...
     if not text:
         return set()
     if text in keyword_cache:
@@ -33,18 +33,26 @@ def extract_keywords_with_gemini(text):
         print(f"Gemini API呼び出し中にエラーが発生しました: {e}")
         return set()
 
+# ▼▼▼ この calculate_similarity_score 関数を修正しました ▼▼▼
 def calculate_similarity_score(user_keywords, job):
     """【スコア計算担当】キーワードを使ってマッチ度を計算する（API呼び出しなし）"""
+    
+    # 求人情報の全ての関連キーワードを一つのセットにまとめる
     job_keywords = set(job.keywords or [])
+    job_keywords.update(set(job.to_dict().get('required_skills', [])))
+    job_keywords.update(set(job.to_dict().get('required_qualifications', [])))
+    job_keywords.update(set(job.to_dict().get('nice_to_have', [])))
+
     if not user_keywords or not job_keywords:
         return 0, ["キーワードが見つかりません"]
 
-    intersection = len(user_keywords.intersection(job_keywords))
-    union = len(user_keywords.union(job_keywords))
-    score = intersection / union if union > 0 else 0
+    # Jaccard係数で類似度を計算
+    intersection = user_keywords.intersection(job_keywords)
+    union = user_keywords.union(job_keywords)
+    score = len(intersection) / len(union) if union else 0
     
     reasons = []
-    if intersection > 0:
-        reasons.append(f"共通キーワード: {', '.join(user_keywords.intersection(job_keywords))}")
+    if intersection:
+        reasons.append(f"共通キーワード: {', '.join(intersection)}")
     
     return round(score, 2), reasons
