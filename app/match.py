@@ -16,8 +16,15 @@ def extract_keywords_with_gemini(text):
         print("--- [CACHE HIT] 保存された結果を返します ---")
         return keyword_cache[text]
     try:
+       try:
+        # ▼▼▼ AIへの指示（プロンプト）を極限までシンプル化 ▼▼▼
         prompt = f"""
-        Analyze the following user profile text. Extract key terms related to skills, qualifications, experiences, and personal traits. Return these terms as a single JSON array under the key "keywords".
+        Extract keywords from the following text. Return a single JSON object with a key "keywords" containing a list of strings.
+        TEXT: "{text}"
+        """
+        
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        response = model.generate_content(prompt)
 
         Example Input:
         3年間、飲食店のホールスタッフとして接客経験を積みました。基本的なPC操作も可能です。お客様とのコミュニケーションが得意で、将来的には店長を目指したいと考えています。
