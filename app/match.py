@@ -9,32 +9,27 @@ genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 keyword_cache = {}
 
 def extract_keywords_with_gemini(text):
-    """【本番モード】Geminiを使って、文章からキーワードをJSON形式で抽出する"""
+    """Geminiを使って、文章からキーワードをJSON形式で抽出する"""
     if not text:
         return set()
     if text in keyword_cache:
         print("--- [CACHE HIT] 保存された結果を返します ---")
         return keyword_cache[text]
     try:
-       try:
-        # ▼▼▼ AIへの指示（プロンプト）を極限までシンプル化 ▼▼▼
+        # AIへの指示（プロンプト）を正しい複数行文字列の形式に修正
         prompt = f"""
-        Extract keywords from the following text. Return a single JSON object with a key "keywords" containing a list of strings.
-        TEXT: "{text}"
-        """
+Analyze the following user profile text. Extract key terms related to skills, qualifications, experiences, and personal traits. Return these terms as a single JSON array under the key "keywords".
+
+Example Input:
+3年間、飲食店のホールスタッフとして接客経験を積みました。基本的なPC操作も可能です。お客様とのコミュニケーションが得意で、将来的には店長を目指したいと考えています。
+
+Example Output:
+{{"keywords": ["飲食店", "ホールスタッフ", "接客経験", "PC操作", "コミュニケーション", "店長"]}}
+
+User Profile Text:
+"{text}"
+"""
         
-        model = genai.GenerativeModel('gemini-1.5-flash-latest')
-        response = model.generate_content(prompt)
-
-        Example Input:
-        3年間、飲食店のホールスタッフとして接客経験を積みました。基本的なPC操作も可能です。お客様とのコミュニケーションが得意で、将来的には店長を目指したいと考えています。
-
-        Example Output:
-        {{"keywords": ["飲食店", "ホールスタッフ", "接客経験", "PC操作", "コミュニケーション", "店長"]}}
-
-        User Profile Text:
-        "{text}"
-        """
         model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content(prompt)
         
@@ -49,34 +44,18 @@ def extract_keywords_with_gemini(text):
         print(f"Gemini API呼び出し中、またはJSON解析中にエラーが発生しました: {e}")
         return set()
 
-def calculate_similarity_score(user_keywords, job, conditions=[]):
-    """キーワードと選択条件を総合的に評価してスコアを計算する"""
+def calculate_similarity_score(user_keywords, job):
+    """【スコア計算担当】キーワードを使ってマッチ度を計算する（API呼び出しなし）"""
     job_keywords = set(job.keywords or [])
-    
-    # ユーザーキーワードと求人キーワードの類似度 (AIスコア)
-    ai_score = 0
-    if user_keywords and job_keywords:
-        intersection = user_keywords.intersection(job_keywords)
-        union = user_keywords.union(job_keywords)
-        ai_score = len(intersection) / len(union) if union else 0
-    
-    # 選択条件の一致度 (条件スコア)
-    condition_score = 0
-    matched_conditions = set(conditions).intersection(job_keywords)
-    if conditions:
-        condition_score = len(matched_conditions) / len(conditions)
+    if not user_keywords or not job_keywords:
+        return 0, ["キーワードが見つかりません"]
 
-    # 最終スコア (AIスコアと条件スコアを組み合わせる)
-    if user_keywords and conditions and matched_conditions:
-        total_score = (ai_score + condition_score) / 2
-    else:
-        total_score = ai_score or condition_score
-
+    intersection = user_keywords.intersection(job_keywords)
+    union = user_keywords.union(job_keywords)
+    score = len(intersection) / len(union) if union else 0
+    
     reasons = []
-    if ai_score > 0:
-        intersection = user_keywords.intersection(job_keywords)
-        reasons.append(f"AI共通キーワード: {', '.join(list(intersection)[:2])}")
-    if matched_conditions:
-        reasons.append(f"選択条件が一致: {', '.join(matched_conditions)}")
+    if intersection:
+        reasons.append(f"共通キーワード: {', '.join(intersection)}")
     
-    return round(total_score, 2), reasons
+    return round(score, 2), reasons
