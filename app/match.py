@@ -32,37 +32,35 @@ def extract_keywords_with_gemini(text):
         print(f"Gemini API呼び出し中にエラーが発生しました: {e}")
         return set()
 
-# ▼▼▼ この calculate_similarity_score 関数を、より賢いロジックに置き換えました ▼▼▼
-def calculate_similarity_score(user_keywords, job):
-    """【スコア計算担当】キーワードの「部分一致」を考慮してマッチ度を計算する"""
+def calculate_similarity_score(user_keywords, job, conditions=[]):
+    """キーワードと選択条件を総合的に評価してスコアを計算する"""
     job_keywords = set(job.keywords or [])
-    if not user_keywords or not job_keywords:
-        return 0, ["キーワードが見つかりません"]
-
-    intersection_count = 0
-    matched_keywords = set()
-
-    # 部分一致をチェック
-    for u_kw in user_keywords:
-        for j_kw in job_keywords:
-            if u_kw in j_kw or j_kw in u_kw:
-                intersection_count += 1
-                matched_keywords.add(u_kw)
-                matched_keywords.add(j_kw)
-                break # 一度マッチしたら次のユーザーキーワードへ
-
-    # 全体集合の数を計算（重複を考慮）
-    union_count = len(user_keywords.union(job_keywords))
     
-    score = intersection_count / union_count if union_count else 0
+    # ユーザーキーワードと求人キーワードの類似度 (AIスコア)
+    ai_score = 0
+    if user_keywords and job_keywords:
+        intersection = user_keywords.intersection(job_keywords)
+        union = user_keywords.union(job_keywords)
+        ai_score = len(intersection) / len(union) if union else 0
     
+    # 選択条件の一致度 (条件スコア)
+    condition_score = 0
+    matched_conditions = set(conditions).intersection(job_keywords)
+    if conditions:
+        condition_score = len(matched_conditions) / len(conditions)
+
+    # 最終スコア (AIスコアと条件スコアを組み合わせる)
+    # 両方ある場合は平均、片方だけならそのスコアをそのまま使う
+    if user_keywords and conditions and matched_conditions:
+        total_score = (ai_score + condition_score) / 2
+    else:
+        total_score = ai_score or condition_score
+
     reasons = []
-    if matched_keywords:
-        # 表示する共通キーワードを整理
-        display_keywords = user_keywords.intersection(job_keywords) # 完全一致したものを優先
-        if not display_keywords:
-             display_keywords = {kw for kw in user_keywords if any(kw in j_kw for j_kw in job_keywords)} # 部分一致したものを表示
-        if display_keywords:
-             reasons.append(f"共通キーワード: {', '.join(list(display_keywords)[:3])}")
-
-    return round(score, 2), reasons
+    if ai_score > 0:
+        intersection = user_keywords.intersection(job_keywords)
+        reasons.append(f"AI共通キーワード: {', '.join(list(intersection)[:2])}")
+    if matched_conditions:
+        reasons.append(f"選択条件が一致: {', '.join(matched_conditions)}")
+    
+    return round(total_score, 2), reasons

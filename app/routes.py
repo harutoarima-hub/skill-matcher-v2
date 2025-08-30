@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request
 from .db import db
 from .models import Job
-# ▼▼▼ インポートする関数名を、新しい2つの名前に修正しました ▼▼▼
 from .match import extract_keywords_with_gemini, calculate_similarity_score
 
 api = Blueprint("api", __name__)
@@ -10,59 +9,56 @@ api = Blueprint("api", __name__)
 def list_jobs():
     return jsonify([j.to_dict() for j in Job.query.all()])
 
-
 @api.route('/match/ad_hoc', methods=['POST'])
 def ad_hoc_match():
     data = request.get_json(force=True)
-    if not data or 'profile_text' not in data:
-        return jsonify({'error': 'No profile text provided'}), 400
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
 
+    # フロントエンドから送られてくるプルダウンと自由記述の両方を受け取る
+    location = data.get('location')
+    sector = data.get('sector')
+    conditions = data.get('conditions', [])
     user_profile_text = data.get('profile_text', '')
 
-    user_keywords = extract_keywords_with_gemini(user_profile_text)
+    # 最初に、プルダウンの条件で求人を絞り込む
+    query = Job.query
+    if location:
+        query = query.filter(Job.location == location)
+    if sector:
+        query = query.filter(Job.sector == sector)
     
-    # ▼▼▼ このprint文を追加 ▼▼▼
-    print(f"--- Geminiが抽出したキーワード: {user_keywords} ---")
+    # チェックボックスの条件は、キーワードに含まれているかで絞り込む
+    if conditions:
+        for cond in conditions:
+            # Job.keywords は JSON 型なので、特定の文字列を含むかで検索します
+            # この書き方はデータベースの種類に依存する場合があります
+            query = query.filter(Job.keywords.op('->>')('$').contains(cond))
+            
+    filtered_jobs = query.all()
 
-    all_jobs = Job.query.all()
+    # AIによるキーワード抽出は、自由記述欄が入力されている場合のみ実行
+    user_keywords = set()
+    if user_profile_text:
+        user_keywords = extract_keywords_with_gemini(user_profile_text)
+    
     results = []
-    for job in all_jobs:
-        score, reasons = calculate_similarity_score(user_keywords, job)
+    for job in filtered_jobs:
+        # スコア計算
+        score, reasons = calculate_similarity_score(user_keywords, job, conditions)
         
-        # ▼▼▼ このprint文を追加 ▼▼▼
-        print(f"-> 求人'{job.title}'とのスコア: {score}")
+        # 絞り込み条件に合致しているだけでも最低スコアを与える
+        if not user_profile_text and (location or sector or conditions):
+            score = max(score, 0.1) # 最低10点
+            if "選択条件に合致" not in reasons:
+                reasons.append("選択条件に合致")
 
-        if score > 0.1:
+        if score >= 0.1: # スコアが10点以上のものだけ表示
             results.append({
-                'job': job.to_dict(),
-                'score': score,
+                'job': job.to_dict(), 
+                'score': score, 
                 'reasons': reasons
             })
 
     results.sort(key=lambda x: x['score'], reverse=True)
     return jsonify({'results': results})
-
-# app/routes.py
-
-
-from .db import db
-from app.seed import seed_data
-
-@api.route("/init-database-manually")
-def init_database_manually():
-    """
-    手動でデータベースを初期化するための特別なエンドポイント。
-    """
-    try:
-        print("--- [MANUAL INIT] データベースの初期化を開始します ---")
-        
-        # init_db.py がやっていた処理をここで実行
-        db.drop_all()
-        db.create_all()
-        seed_data()
-        
-        print("--- [MANUAL INIT] データベースの初期化が成功しました ---")
-        return "データベースの初期化に成功しました。", 200
-    except Exception as e:
-        print(f"--- [MANUAL INIT] エラーが発生しました: {e} ---")
-        return f"エラーが発生しました: {e}", 500
