@@ -41,3 +41,28 @@ def ad_hoc_match():
 
     results.sort(key=lambda x: x['score'], reverse=True)
     return jsonify({'results': results})
+
+# app/routes.py
+
+
+from .db import db
+from app.seed import seed_data
+
+@api.route("/init-database-manually")
+def init_database_manually():
+    """
+    手動でデータベースを初期化するための特別なエンドポイント。
+    """
+    try:
+        print("--- [MANUAL INIT] データベースの初期化を開始します ---")
+        
+        # init_db.py がやっていた処理をここで実行
+        db.drop_all()
+        db.create_all()
+        seed_data()
+        
+        print("--- [MANUAL INIT] データベースの初期化が成功しました ---")
+        return "データベースの初期化に成功しました。", 200
+    except Exception as e:
+        print(f"--- [MANUAL INIT] エラーが発生しました: {e} ---")
+        return f"エラーが発生しました: {e}", 500
