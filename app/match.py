@@ -7,29 +7,38 @@ genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 keyword_cache = {}
 
 def extract_keywords_with_gemini(text):
-    """【API呼び出し担当】Geminiを使って、文章からキーワードを抽出する"""
+    """Geminiを使って、文章からキーワードをJSON形式で抽出する"""
     if not text:
         return set()
     if text in keyword_cache:
         return keyword_cache[text]
     try:
+        # ▼▼▼ AIへの指示（プロンプト）を、より明確で簡潔なものに修正しました ▼▼▼
         prompt = f"""
-        以下の文章は、ある人物の自己PRです。
-        この内容から、その人物のスキル、資格、経験、特性などを表すキーワードを抽出し、
-        {{"keywords": ["スキル1", "スキル2", ...]}} という形式のJSONオブジェクトで返してください。
+        Analyze the following user profile text. Extract key terms related to skills, qualifications, experiences, and personal traits. Return these terms as a single JSON array under the key "keywords".
 
-        文章:
+        Example Input:
+        3年間、飲食店のホールスタッフとして接客経験を積みました。基本的なPC操作も可能です。お客様とのコミュニケーションが得意で、将来的には店長を目指したいと考えています。
+
+        Example Output:
+        {{"keywords": ["飲食店", "ホールスタッフ", "接客経験", "PC操作", "コミュニケーション", "店長"]}}
+
+        User Profile Text:
         "{text}"
         """
+        
         model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content(prompt)
+        
+        print(f"--- Geminiからの生の返答: ---\n{response.text}\n--------------------------")
+        
         result_text = response.text.strip().replace("```json", "").replace("```", "")
         keywords_data = json.loads(result_text)
         result_set = set(keywords_data.get("keywords", []))
         keyword_cache[text] = result_set
         return result_set
     except Exception as e:
-        print(f"Gemini API呼び出し中にエラーが発生しました: {e}")
+        print(f"Gemini API呼び出し中、またはJSON解析中にエラーが発生しました: {e}")
         return set()
 
 def calculate_similarity_score(user_keywords, job, conditions=[]):
