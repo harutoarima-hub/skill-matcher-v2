@@ -7,7 +7,7 @@ genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 keyword_cache = {}
 
 def extract_keywords_with_gemini(text):
-    # ... (この関数は変更ありません) ...
+    """【API呼び出し担当】Geminiを使って、文章からキーワードを抽出する"""
     if not text:
         return set()
     if text in keyword_cache:
@@ -37,11 +37,8 @@ def extract_keywords_with_gemini(text):
 def calculate_similarity_score(user_keywords, job):
     """【スコア計算担当】キーワードを使ってマッチ度を計算する（API呼び出しなし）"""
     
-    # 求人情報の全ての関連キーワードを一つのセットにまとめる
+    # 求人情報のキーワードを、正しい'keywords'項目からのみ取得する
     job_keywords = set(job.keywords or [])
-    job_keywords.update(set(job.to_dict().get('required_skills', [])))
-    job_keywords.update(set(job.to_dict().get('required_qualifications', [])))
-    job_keywords.update(set(job.to_dict().get('nice_to_have', [])))
 
     if not user_keywords or not job_keywords:
         return 0, ["キーワードが見つかりません"]
